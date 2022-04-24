@@ -9,7 +9,7 @@ workspace_dir=${shell_folder}/../../..
 
 tfm_mode=ipc
 tfm_debug=y
-tfm_test=y
+tfm_test=n
 
 # toolchain
 toolchains_try_dir1=~/.toolchains;
@@ -107,7 +107,8 @@ get_external_lib
 
 #build_option
 build_option=
-build_option+=" .. -DTFM_PLATFORM=arm/mps2/an521 -DBL2=False"
+build_option+=" .. -DTFM_PLATFORM=thomas/m33 -DBL2=False"
+#build_option+=" .. -DTFM_PLATFORM=arm/mps2/an521 -DBL2=False"
 build_option+=" -DTFM_TOOLCHAIN_FILE=${tfm_home}/toolchain_GNUARM.cmake"
 
 build_option+=" -DMBEDCRYPTO_PATH=${tfm_home}/external/mbedcrypto-src"
@@ -134,9 +135,9 @@ if [[ "${tfm_test}" = "y" ]]; then
     build_option+=" -DTEST_S=ON"
 fi
 
-#clean and rebuild
-#rm -rf "${tfm_home}"/build
-#mkdir "${tfm_home}"/build
+# Build TFM
+rm -rf "${tfm_home}"/build
+mkdir "${tfm_home}"/build
 
 cd "${tfm_home}"/build || exit
 
@@ -144,3 +145,9 @@ cmake ${build_option}
 make install
 
 arm-none-eabi-objdump -xD bin/tfm_s.elf > bin/tfm_s.asm
+
+# Build FreeRTOS
+cd ${shell_folder}/../FreeRTOS/FreeRTOS/Demo/THOMAS_M33_QEMU
+rm -rf build
+make DEBUG=1
+arm-none-eabi-objdump -xd build/RTOSDemo.axf > build/RTOSDemo.asm
